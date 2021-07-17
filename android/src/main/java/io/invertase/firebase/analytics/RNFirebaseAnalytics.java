@@ -2,6 +2,7 @@ package io.invertase.firebase.analytics;
 
 import android.app.Activity;
 import android.util.Log;
+import android.os.Bundle;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -10,6 +11,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import java.util.ArrayList;
 import javax.annotation.Nullable;
 
 
@@ -34,7 +36,7 @@ public class RNFirebaseAnalytics extends ReactContextBaseJavaModule {
   public void logEvent(final String name, @Nullable final ReadableMap params) {
     FirebaseAnalytics
       .getInstance(getReactApplicationContext())
-      .logEvent(name, Arguments.toBundle(params));
+      .logEvent(name, toBundle(params));
   }
 
   /**
@@ -107,5 +109,22 @@ public class RNFirebaseAnalytics extends ReactContextBaseJavaModule {
     FirebaseAnalytics
       .getInstance(getReactApplicationContext())
       .setUserProperty(name, value);
+  }
+
+  private Bundle toBundle(ReadableMap readableMap) {
+  Bundle bundle = Arguments.toBundle(readableMap);
+  if (bundle == null) {
+    return null;
+  }
+
+  ArrayList itemsArray = (ArrayList) bundle.getSerializable("items");
+  if(itemsArray != null){
+    for (Object item : itemsArray != null ? itemsArray : new ArrayList()) {
+      double number = ((Bundle) item).getDouble("quantity");
+      ((Bundle) item).putInt("quantity", (int) number);
+    }
+  }
+
+  return bundle;
   }
 }
