@@ -7,8 +7,8 @@
 @implementation RNFirebaseAnalytics
 RCT_EXPORT_MODULE();
 
-RCT_EXPORT_METHOD(logEvent:(NSString *)name props:(NSDictionary *)props) {
-  [FIRAnalytics logEventWithName:name parameters:props];
+RCT_EXPORT_METHOD(logEvent:(NSString *)name params:(NSDictionary *)params) {
+  [FIRAnalytics logEventWithName:name parameters:[self cleanJavascriptParams:params]];
 }
 
 RCT_EXPORT_METHOD(setAnalyticsCollectionEnabled:(BOOL) enabled) {
@@ -32,6 +32,26 @@ RCT_EXPORT_METHOD(setUserProperty: (NSString *) name value:(NSString *) value) {
 // not implemented on iOS sdk
 RCT_EXPORT_METHOD(setMinimumSessionDuration:(nonnull NSNumber *) milliseconds) {}
 RCT_EXPORT_METHOD(setSessionTimeoutDuration:(nonnull NSNumber *) milliseconds) {}
+
+#pragma mark -
+#pragma mark Private methods
+
+  - (NSDictionary *)cleanJavascriptParams:(NSDictionary *)params {
+    NSMutableDictionary *newParams = [params mutableCopy];
+    if (newParams[kFIRParameterItems]) {
+      NSMutableArray *newItems = [NSMutableArray array];
+      [(NSArray *)newParams[kFIRParameterItems] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSMutableDictionary *item = [obj mutableCopy];
+        if (item[kFIRParameterQuantity]) {
+          item[kFIRParameterQuantity] = @([item[kFIRParameterQuantity] integerValue]);
+        }
+        [newItems addObject:[item copy]];
+      }];
+      newParams[kFIRParameterItems] = [newItems copy];
+    }
+    return [newParams copy];
+  }
+
 @end
 
 #else
