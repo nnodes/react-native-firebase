@@ -43,6 +43,12 @@ RCT_EXPORT_METHOD(setSessionTimeoutDuration:(nonnull NSNumber *) milliseconds) {
       [(NSArray *)newParams[kFIRParameterItems] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSMutableDictionary *item = [obj mutableCopy];
         if (item[kFIRParameterQuantity]) {
+          NSOperatingSystemVersion ios15 = (NSOperatingSystemVersion){15, 0, 0};
+          if (![[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios15]) {
+              item[kFIRParameterQuantity] = @([item[kFIRParameterQuantity] doubleValue]);
+              item[kFIRParameterPrice] = @([item[kFIRParameterPrice] doubleValue]);
+          }
+
           item[kFIRParameterQuantity] = @([item[kFIRParameterQuantity] integerValue]);
         }
         [newItems addObject:[item copy]];
